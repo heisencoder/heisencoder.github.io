@@ -2,3 +2,6 @@
 	path = 2048
 	url = https://github.com/heisencoder/2048.git
 	branch = master
+[submodule "farm-game"]
+	path = farm-game
+	url = https://github.com/heisencoder/farm-game.git
