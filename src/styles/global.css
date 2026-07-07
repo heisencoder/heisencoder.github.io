@@ -1,0 +1,526 @@
+/* =========================================================================
+   heisencoder.net — global stylesheet
+   Aesthetic: 1960s teletype / terminal printout (borrowed, with thanks, from
+   the Greenbriar Technology Group site).
+   Primary color: mint green. Secondary color: burnt orange.
+   ========================================================================= */
+
+/* -------------------------------------------------------------------------
+   Self-hosted IBM Plex Mono (latin + latin-ext, weights 400/500/700).
+   Served from /fonts so the browser never makes a render-blocking trip to
+   fonts.googleapis.com / fonts.gstatic.com.
+
+   font-display: optional — the browser uses the web font only if it's ready
+   within a brief block window (it usually is, thanks to the preload in
+   Layout.astro), otherwise it renders the monospace fallback for that pageview
+   and does NOT swap mid-view. Either way the text never reflows after paint, so
+   font loading contributes zero layout shift (CLS).
+
+   The latin-ext files only download if a glyph in that range is used.
+   ------------------------------------------------------------------------- */
+@font-face {
+  font-family: 'IBM Plex Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: optional;
+  src: url('/fonts/ibm-plex-mono-400-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'IBM Plex Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: optional;
+  src: url('/fonts/ibm-plex-mono-400-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+@font-face {
+  font-family: 'IBM Plex Mono';
+  font-style: normal;
+  font-weight: 500;
+  font-display: optional;
+  src: url('/fonts/ibm-plex-mono-500-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'IBM Plex Mono';
+  font-style: normal;
+  font-weight: 500;
+  font-display: optional;
+  src: url('/fonts/ibm-plex-mono-500-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+@font-face {
+  font-family: 'IBM Plex Mono';
+  font-style: normal;
+  font-weight: 700;
+  font-display: optional;
+  src: url('/fonts/ibm-plex-mono-700-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'IBM Plex Mono';
+  font-style: normal;
+  font-weight: 700;
+  font-display: optional;
+  src: url('/fonts/ibm-plex-mono-700-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+:root {
+  /* Brand palette */
+  --mint: #1f9e6f;          /* primary — mint green (fills, borders, accents) */
+  --mint-ink: #0e7a54;      /* darker mint for text/links on paper (meets WCAG AA) */
+  --mint-bright: #2bd49a;   /* brighter mint for accents on dark surfaces */
+  --mint-wash: #e6f7ef;     /* faint mint background wash */
+  --orange: #c0500f;        /* secondary — burnt orange */
+  --orange-ink: #ad470c;    /* darker burnt orange for text on the orange wash (AA) */
+  --orange-bright: #e2691f; /* brighter burnt orange for hovers */
+  --orange-wash: #fbeee2;   /* faint orange background wash */
+
+  /* Surfaces & ink — a teletype printout on warm paper */
+  --paper: #f7f5ee;         /* page background */
+  --paper-raised: #fffdf7;  /* cards / raised surfaces */
+  --ink: #1c1b18;           /* primary text */
+  --ink-soft: #4a473f;      /* secondary text */
+  --ink-faint: #6f6c60;     /* muted text (darkened to meet WCAG AA on paper) */
+  --rule: #d8d3c4;          /* hairlines / borders */
+  --ink-dark-surface: #14150f; /* dark band background */
+
+  /* Typography — fixed-width throughout */
+  --mono: 'IBM Plex Mono', 'JetBrains Mono', 'SFMono-Regular', 'Menlo',
+    'Consolas', 'Liberation Mono', monospace;
+
+  /* Rhythm */
+  --maxw: 64rem;
+  --maxw-prose: 46rem;
+  --gap: clamp(1rem, 2.5vw, 2rem);
+  --radius: 4px;
+}
+
+/* ----- Reset-ish ----- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+body {
+  margin: 0;
+  font-family: var(--mono);
+  font-size: 16px;
+  line-height: 1.65;
+  color: var(--ink);
+  background-color: var(--paper);
+  /* Subtle horizontal "feed lines" like fan-fold teletype paper */
+  background-image: repeating-linear-gradient(
+    to bottom,
+    transparent 0,
+    transparent 2.25rem,
+    rgba(0, 0, 0, 0.018) 2.25rem,
+    rgba(0, 0, 0, 0.018) calc(2.25rem + 1px)
+  );
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+a {
+  color: var(--mint-ink);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+
+a:hover {
+  color: var(--orange);
+  border-bottom-color: var(--orange);
+}
+
+/* In-text links carry an underline so they're distinguishable without relying
+   on color alone (WCAG 1.4.1). Header/footer nav, buttons, and card chips —
+   which sit outside running prose — keep the clean, underline-free look. */
+main :is(p, li, dd) a {
+  border-bottom-color: currentColor;
+}
+
+main :is(p, li, dd) a:hover {
+  border-bottom-color: var(--orange);
+}
+
+h1,
+h2,
+h3,
+h4 {
+  line-height: 1.2;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  margin: 0 0 0.6em;
+}
+
+h1 {
+  font-size: clamp(1.8rem, 4.5vw, 3rem);
+}
+
+h2 {
+  font-size: clamp(1.4rem, 3vw, 2rem);
+}
+
+h3 {
+  font-size: 1.15rem;
+}
+
+p {
+  margin: 0 0 1rem;
+  max-width: 62ch;
+}
+
+ul,
+ol {
+  max-width: 62ch;
+}
+
+code,
+kbd {
+  background: var(--mint-wash);
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+  padding: 0.05em 0.35em;
+  font-size: 0.9em;
+}
+
+hr {
+  border: none;
+  border-top: 1px solid var(--rule);
+  margin: 2rem 0;
+}
+
+/* ----- Layout primitives ----- */
+.container {
+  width: 100%;
+  max-width: var(--maxw);
+  margin-inline: auto;
+  padding-inline: var(--gap);
+}
+
+.container--prose {
+  max-width: var(--maxw-prose);
+}
+
+.section {
+  padding-block: clamp(3rem, 7vw, 5.5rem);
+}
+
+.section--tight {
+  padding-block: clamp(2rem, 4vw, 3rem);
+}
+
+.section--dark {
+  background: var(--ink-dark-surface);
+  color: #ece9df;
+}
+
+.section--dark h1,
+.section--dark h2,
+.section--dark h3 {
+  color: #fff;
+}
+
+.section--dark a {
+  color: var(--mint-bright);
+}
+
+.section--dark a:hover {
+  color: var(--orange-bright);
+  border-bottom-color: var(--orange-bright);
+}
+
+.section--dark .eyebrow {
+  color: var(--orange-bright);
+}
+
+.section--dark .lead {
+  color: #d7d4c8;
+}
+
+.section--dark .btn--primary {
+  color: #06281d;
+}
+
+/* Eyebrow label — the "command prompt" motif */
+.eyebrow {
+  display: inline-block;
+  font-size: 0.8rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--orange);
+  margin-bottom: 0.75rem;
+}
+
+.eyebrow::before {
+  content: '> ';
+  color: var(--mint);
+}
+
+.lead {
+  font-size: clamp(1.05rem, 2vw, 1.25rem);
+  color: var(--ink-soft);
+  max-width: 62ch;
+}
+
+/* ----- Buttons ----- */
+.btn {
+  display: inline-block;
+  font-family: var(--mono);
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  padding: 0.7rem 1.4rem;
+  border-radius: var(--radius);
+  border: 2px solid var(--mint);
+  cursor: pointer;
+  transition: transform 0.1s ease, background 0.15s ease, color 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.btn--primary {
+  background: var(--mint);
+  color: #06281d;
+}
+
+.btn--primary:hover {
+  background: var(--orange);
+  border-color: var(--orange);
+  color: #fff;
+  transform: translateY(-1px);
+}
+
+.btn--ghost {
+  background: transparent;
+  color: var(--ink);
+  border-color: var(--rule);
+}
+
+.btn--ghost:hover {
+  border-color: var(--orange);
+  color: var(--orange);
+  transform: translateY(-1px);
+}
+
+/* ----- Cards / grids ----- */
+.grid {
+  display: grid;
+  gap: var(--gap);
+}
+
+@media (min-width: 40rem) {
+  .grid--2 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .grid--3 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.card {
+  background: var(--paper-raised);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  padding: 1.5rem;
+  position: relative;
+}
+
+.card__tag {
+  font-size: 0.75rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--mint-ink);
+}
+
+.card h3 {
+  margin-top: 0.4rem;
+}
+
+.card p {
+  color: var(--ink-soft);
+  margin-bottom: 0;
+}
+
+/* Accent rule that sits on top of a card */
+.card--accent {
+  border-top: 3px solid var(--orange);
+}
+
+/* A whole card that is a link (project / social tiles). */
+a.card {
+  display: block;
+  color: inherit;
+  border-bottom: 1px solid var(--rule);
+}
+
+a.card:hover {
+  border-color: var(--orange);
+  color: inherit;
+  transform: translateY(-2px);
+  transition: transform 0.12s ease, border-color 0.15s ease;
+}
+
+/* ----- Blinking terminal cursor ----- */
+.cursor {
+  display: inline-block;
+  width: 0.6ch;
+  height: 1.05em;
+  margin-left: 0.1ch;
+  background: var(--mint);
+  transform: translateY(0.12em);
+  animation: blink 1.05s steps(1) infinite;
+}
+
+@keyframes blink {
+  0%,
+  50% {
+    opacity: 1;
+  }
+  50.01%,
+  100% {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cursor {
+    animation: none;
+  }
+}
+
+/* ----- Prose (rendered markdown: blog posts) ----- */
+.prose {
+  max-width: var(--maxw-prose);
+}
+
+.prose > * + * {
+  margin-top: 1.15rem;
+}
+
+.prose h2 {
+  margin-top: 2.4rem;
+}
+
+.prose h3 {
+  margin-top: 1.8rem;
+}
+
+.prose ul,
+.prose ol {
+  padding-left: 1.4rem;
+}
+
+.prose li + li {
+  margin-top: 0.35rem;
+}
+
+.prose a {
+  border-bottom-color: currentColor;
+}
+
+.prose a:hover {
+  border-bottom-color: var(--orange);
+}
+
+.prose blockquote {
+  margin: 0;
+  padding-left: 1.1rem;
+  border-left: 3px solid var(--mint);
+  color: var(--ink-soft);
+  font-style: italic;
+}
+
+.prose img {
+  border-radius: var(--radius);
+  border: 1px solid var(--rule);
+}
+
+/* Fenced code blocks (Astro/Shiki wraps them in <pre class="astro-code">). */
+.prose pre {
+  background: var(--ink-dark-surface);
+  color: #ece9df;
+  border-radius: var(--radius);
+  padding: 1rem 1.25rem;
+  overflow-x: auto;
+  font-size: 0.9rem;
+  line-height: 1.55;
+}
+
+/* Inline code keeps the mint chip; code inside a fenced block does not. */
+.prose pre code {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: inherit;
+}
+
+.prose table {
+  border-collapse: collapse;
+  width: 100%;
+  display: block;
+  overflow-x: auto;
+}
+
+.prose th,
+.prose td {
+  border: 1px solid var(--rule);
+  padding: 0.45rem 0.7rem;
+  text-align: left;
+}
+
+/* ----- Utility ----- */
+.text-center {
+  text-align: center;
+}
+
+.mt-0 {
+  margin-top: 0;
+}
+
+.stack > * + * {
+  margin-top: 1rem;
+}
+
+.skip-link {
+  position: absolute;
+  left: -999px;
+  top: 0;
+  background: var(--ink);
+  color: #fff;
+  padding: 0.6rem 1rem;
+  z-index: 100;
+}
+
+.skip-link:focus {
+  left: 0.5rem;
+  top: 0.5rem;
+}
+
+:focus-visible {
+  outline: 2px solid var(--orange);
+  outline-offset: 2px;
+}
