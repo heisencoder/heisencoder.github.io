@@ -3,13 +3,14 @@
 A monospaced MICR-style display font built programmatically from an ASCII-art
 spec, plus the tooling that compiles and verifies it.
 
-The spec ([`HeisenMICR.md`](HeisenMICR.md)) is the source of truth: each glyph is
-a 7×7 grid of `#` modules. The build pipeline turns each module into a rectangle
-(uppercase 1.8∶1, lowercase 1∶1 small caps), joins diagonally-adjacent modules
-with slanted bands, unions everything with skia-pathops, and rounds every corner
-with a fillet. It covers A–Z, digits, and ASCII punctuation; lowercase is derived
-from the capitals as small caps set in the bottom square. See the spec's
-top-matter for the full metrics and rendering rules.
+The spec ([`HeisenMICR.md`](HeisenMICR.md)) is the source of truth and a complete,
+implementation-agnostic description of the typeface: each glyph is a 7×7 grid of
+`#` modules. The build pipeline turns each module into a rectangle (uppercase
+9∶5), joins diagonally-adjacent modules with slanted bands, unions everything
+with skia-pathops, and rounds every corner with a quarter-module circular-arc
+fillet. It covers A–Z, digits, and ASCII punctuation; lowercase is derived from
+the capitals as small caps at 5/7 of the cap height. See the spec's top-matter
+for the full metrics and rendering rules.
 
 ## Layout
 
