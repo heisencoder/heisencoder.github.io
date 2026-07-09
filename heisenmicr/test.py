@@ -63,11 +63,15 @@ def contour_stats(path):
 
 
 def raster_check(name, ch, cells):
-    # empty cells flanking a pure-diagonal pair: the band edge passes
-    # exactly through their centers, so center-sampling is ill-defined
-    from spec import pure_diagonal_pairs
+    # empty cells flanking a join band (pure diagonal, stem junction, or corner
+    # bevel): the band edge sweeps through their centers, so center-sampling is
+    # ill-defined there and the diagonal legitimately inks part of the cell.
+    from spec import (pure_diagonal_pairs, stem_junction_pairs,
+                      corner_bevel_pairs)
     skip = set()
-    for (r, c), (r2, c2) in pure_diagonal_pairs(cells):
+    for (r, c), (r2, c2) in (pure_diagonal_pairs(cells)
+                             + stem_junction_pairs(cells)
+                             + corner_bevel_pairs(cells)):
         skip.add((r2, c))
         skip.add((r, c2))
     fnt = ImageFont.truetype(OUT, SIZE)

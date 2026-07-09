@@ -1,10 +1,26 @@
 #!/usr/bin/env python3
 """Proof sheets for HeisenMICR: labeled glyph grid with guides, text sheet, close-ups."""
 import sys
+from pathlib import Path
+
 from PIL import Image, ImageDraw, ImageFont
 
-TTF = "/home/claude/heisenmicr/HeisenMICR.ttf"
-LABEL = "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"
+HERE = Path(__file__).parent
+TTF = str(HERE / "HeisenMICR.ttf")
+
+
+def _label_font(size):
+    """Locate a plain sans label font, falling back to PIL's default."""
+    for path in (
+        "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
+        "/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf",
+        "/System/Library/Fonts/Supplemental/Arial.ttf",
+    ):
+        if Path(path).exists():
+            return ImageFont.truetype(path, size)
+    return ImageFont.load_default()
+
+
 CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 
 BG, FG, GUIDE, LBL = "#101010", "#E8E2D5", "#3A5A3A", "#707070"
@@ -14,7 +30,7 @@ UPM, CAP = 1000, 693
 def grid():
     size = 150
     fnt = ImageFont.truetype(TTF, size)
-    lbl = ImageFont.truetype(LABEL, 16)
+    lbl = _label_font(16)
     cols, cw, ch = 9, 130, 190
     rows = (len(CHARS) + cols - 1) // cols
     img = Image.new("RGB", (cols * cw + 20, rows * ch + 20), BG)
@@ -29,7 +45,7 @@ def grid():
         d.line([(x0 + 5, cap_y), (x0 + cw - 10, cap_y)], fill=GUIDE)
         d.text((x0 + 30, y0 + 15), c, font=fnt, fill=FG)
         d.text((x0 + 5, y0 + ch - 24), c, font=lbl, fill=LBL)
-    img.save("/home/claude/heisenmicr/proof_grid.png")
+    img.save(str(HERE / "proof_grid.png"))
     print("proof_grid.png")
 
 
@@ -50,14 +66,14 @@ def text_sheet():
         fnt = ImageFont.truetype(TTF, size)
         d.text((40, y), s, font=fnt, fill=color)
         y += int(size * 1.6)
-    img.save("/home/claude/heisenmicr/proof_text.png")
+    img.save(str(HERE / "proof_text.png"))
     print("proof_text.png")
 
 
 def close(chars):
     size = 340
     fnt = ImageFont.truetype(TTF, size)
-    lbl = ImageFont.truetype(LABEL, 20)
+    lbl = _label_font(20)
     cw, ch = 240, 440
     cols = min(len(chars), 6)
     rows = (len(chars) + cols - 1) // cols
@@ -73,13 +89,17 @@ def close(chars):
         d.line([(x0, cap_y), (x0 + cw - 10, cap_y)], fill=GUIDE)
         d.text((x0 + 30, y0 + 30), c, font=fnt, fill=FG)
         d.text((x0 + 8, y0 + ch - 28), c, font=lbl, fill=LBL)
-    img.save("/home/claude/heisenmicr/proof_close.png")
+    img.save(str(HERE / "proof_close.png"))
     print("proof_close.png")
 
 
-if __name__ == "__main__":
+def main():
     if len(sys.argv) > 1:
         close(sys.argv[1])
     else:
         grid()
         text_sheet()
+
+
+if __name__ == "__main__":
+    main()
