@@ -34,10 +34,10 @@ For each character, test that these assertions are true.
 ## B
 
 ```
-#####
-#    #
-#    #
-#####
+######
+#     #
+#     #
+######
 ##   ##
 ##   ##
 ######
@@ -52,7 +52,7 @@ For each character, test that these assertions are true.
 ##
 ##
 ##
-#######
+ ######
 ```
 
 ## D
@@ -73,7 +73,7 @@ For each character, test that these assertions are true.
 #######
 #
 #
-#######
+######
 ##
 ##
 #######
@@ -94,10 +94,10 @@ For each character, test that these assertions are true.
 ## G
 
 ```
-######
+ #####
 #     #
 #
-##   ##
+##  ###
 ##    #
 ##    #
 ######
@@ -238,13 +238,13 @@ For each character, test that these assertions are true.
 ## S
 
 ```
- ######
-##
-##
+ #####
+#
+#
  #####
      ##
      ##
-######     
+ #####
 ```
 
 ## T
@@ -314,7 +314,7 @@ For each character, test that these assertions are true.
  #   #
   # #
    #
-   ##
+   #
    ##
    ##
 ```
@@ -351,8 +351,8 @@ For each character, test that these assertions are true.
  # #
    #
    #
-   ##
-   ##
+  ####
+  ####
 ```
 
 ## 2
@@ -419,9 +419,9 @@ For each character, test that these assertions are true.
 
 ```
 #######
-      #
      #
     #
+   #
    #
    ##
    ##
