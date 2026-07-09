@@ -8,9 +8,12 @@ import spec
 import test as micr_test
 
 
-def test_spec_parses_36_glyphs():
+def test_spec_parses_all_glyphs():
     glyphs = spec.parse_spec()
-    assert len(glyphs) == 36
+    # A-Z + digits + punctuation, all named and code-pointed
+    assert len(glyphs) == spec.EXPECTED_GLYPHS
+    for name in glyphs:
+        assert name in spec.CODEPOINTS, name
     # every glyph is a 7x7 grid, columns 0..6
     for name, cells in glyphs.items():
         assert all(0 <= r <= 6 and 0 <= c <= 6 for (r, c) in cells), name

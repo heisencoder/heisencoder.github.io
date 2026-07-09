@@ -1,12 +1,15 @@
 # HeisenMICR
 
-A MICR-style display font built programmatically from an ASCII-art spec, plus the
-tooling that compiles and verifies it.
+A monospaced MICR-style display font built programmatically from an ASCII-art
+spec, plus the tooling that compiles and verifies it.
 
-The spec ([`HeisenMICR.md`](HeisenMICR.md)) is the source of truth: each glyph is a
-7×7 grid of `#` cells. The build pipeline turns each cell into a 1.8:1 rectangle,
-joins diagonally-adjacent cells with slanted bands, unions everything with
-skia-pathops, and rounds every corner with a 1/8-block fillet.
+The spec ([`HeisenMICR.md`](HeisenMICR.md)) is the source of truth: each glyph is
+a 7×7 grid of `#` modules. The build pipeline turns each module into a rectangle
+(uppercase 1.8∶1, lowercase 1∶1 small caps), joins diagonally-adjacent modules
+with slanted bands, unions everything with skia-pathops, and rounds every corner
+with a fillet. It covers A–Z, digits, and ASCII punctuation; lowercase is derived
+from the capitals as small caps set in the bottom square. See the spec's
+top-matter for the full metrics and rendering rules.
 
 ## Layout
 
@@ -17,6 +20,7 @@ skia-pathops, and rounds every corner with a 1/8-block fillet.
 | `build.py` | Compile `HeisenMICR.ttf` from the spec |
 | `test.py` | Assertions against the built font (contours, holes, raster) |
 | `preview.py` | Render proof sheets (`proof_*.png`) |
+| `specimen.py` | Render the specimen sheet |
 | `HeisenMICR.ttf` | The compiled font (committed artifact) |
 | `specimen_heisenmicr.png` | Specimen sheet (committed artifact) |
 
@@ -36,6 +40,7 @@ uv run pytest           # build + run the assertions as a test suite
 uv run spec.py          # print the grid connectivity/hole report
 uv run preview.py       # render proof_grid.png + proof_text.png
 uv run preview.py ABC   # render a close-up sheet for specific characters
+uv run specimen.py      # regenerate specimen_heisenmicr.png
 ```
 
 `uv run test.py` and `uv run pytest` both exit non-zero if any glyph fails its

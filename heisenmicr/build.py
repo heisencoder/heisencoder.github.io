@@ -2,12 +2,16 @@
 """Compile HeisenMICR.ttf from the markdown spec.
 
 Pipeline per glyph:
-  1. Each solid cell -> rectangle (w=55 x h=99 units, 1.8:1 exact)
-  2. Each pure-diagonal pair -> rhombus at shared corner
-     (half-diagonals k=31 -> perpendicular waist ~= 1 block width)
+  1. Each solid cell -> rectangle, W=55 wide x cell-height tall (uppercase
+     h=99, 1.8:1; lowercase h=55, 1:1 small caps in the bottom square)
+  2. Each diagonal join pair -> parallelogram band across the shared corner
+     (pure staircases, diagonals into stems, and outer corner bevels)
   3. skia-pathops simplify (union, fixed winding) -> clean non-overlapping outline
-  4. Fillet every corner: radius 7 (= w/8), quadratic approximation
+  4. Fillet every corner with a quadratic Bezier, radius 14 (~1/4 cell width)
   5. TTGlyphPen -> glyf
+
+Lowercase is derived from the uppercase grids; only A-Z, the digits and the
+punctuation are defined in HeisenMICR.md.
 """
 import math
 from pathlib import Path
@@ -19,39 +23,42 @@ from fontTools.misc.timeTools import timestampNow
 import pathops
 
 from spec import (parse_spec, pure_diagonal_pairs, stem_junction_pairs,
-                  corner_bevel_pairs)
+                  corner_bevel_pairs, CODEPOINTS)
 
 # ── Geometry constants ──────────────────────────────────────────
-W, H = 55, 99            # block size, 1.8:1 exact
-XOFF = 55                # left side bearing = 1 block (2-block total gap)
-ADV = 9 * W              # 495: 7-block body + 2-block gap
-CAP = 7 * H              # 693
-R_FILLET = 14            # 1/4 of block width
+W, H = 55, 99            # uppercase cell, 1.8:1 exact
+LOWER_H = 55             # lowercase cell, 1:1 (small caps in the bottom square)
+XOFF = 55                # left side bearing = 1 cell (2-cell total gap)
+ADV = 9 * W              # 495: 7-cell body + 2-cell gap
+CAP = 7 * H              # 693 cap height
+XHEIGHT = 7 * LOWER_H    # 385 small-cap height
+R_FILLET = 14            # ~1/4 of cell width
 
 OUT = str(Path(__file__).with_name("HeisenMICR.ttf"))
-VERSION = "1.200"
+VERSION = "1.300"
 
 
-def cell_rect(r, c):
+def cell_rect(r, c, h=H):
     x0 = XOFF + c * W
-    y0 = (6 - r) * H
-    return [(x0, y0), (x0 + W, y0), (x0 + W, y0 + H), (x0, y0 + H)]
+    y0 = (6 - r) * h
+    return [(x0, y0), (x0 + W, y0), (x0 + W, y0 + h), (x0, y0 + h)]
 
 
-def join_band(a, b):
-    """Parallelogram whose slanted edges (slope ±1.8) pass through the
-    corners of the two diagonally adjacent blocks. Consecutive chain
+def join_band(a, b, h=H):
+    """Parallelogram whose slanted edges (slope ±h/W) pass through the
+    corners of the two diagonally adjacent cells. Consecutive chain
     segments share the same support lines, so long diagonals render as
-    single straight strokes with no stepping."""
+    single straight strokes with no stepping. (Slope is ±1.8 for the
+    uppercase cell, ±1 for the square lowercase cell.)"""
     (r, c), (r2, c2) = a, b            # r2 = r+1, c2 = c±1
     x0 = XOFF + c * W
-    y0 = (6 - r) * H                   # bottom of upper cell a
+    y0 = (6 - r) * h                   # bottom of upper cell a
     if c2 == c + 1:                    # "\" pair: A upper-left, B lower-right
-        return [(x0, y0), (x0 + W, y0 - H),
-                (x0 + 2 * W, y0), (x0 + W, y0 + H)]        # CCW
+        return [(x0, y0), (x0 + W, y0 - h),
+                (x0 + 2 * W, y0), (x0 + W, y0 + h)]        # CCW
     else:                              # "/" pair: A upper-right, B lower-left
-        return [(x0, y0 + H), (x0 - W, y0),
-                (x0, y0 - H), (x0 + W, y0)]                # CCW
+        return [(x0, y0 + h), (x0 - W, y0),
+                (x0, y0 - h), (x0 + W, y0)]                # CCW
 
 
 def union_contours(polys):
@@ -122,14 +129,14 @@ def fillet_contour(pts, radius):
     return [((round(x), round(y)), on) for ((x, y), on) in out]
 
 
-def draw_glyph(pen, cells):
-    polys = [cell_rect(r, c) for (r, c) in sorted(cells)]
+def draw_glyph(pen, cells, h=H):
+    polys = [cell_rect(r, c, h) for (r, c) in sorted(cells)]
     # diagonal join bands: isolated staircases (pure), diagonals running into a
     # stem (stem junction), and stair-stepped outer corners (corner bevel). The
     # rules can name the same pair, so dedupe before drawing.
     bands = (set(pure_diagonal_pairs(cells)) | set(stem_junction_pairs(cells))
              | set(corner_bevel_pairs(cells)))
-    polys += [join_band(a, b) for a, b in sorted(bands)]
+    polys += [join_band(a, b, h) for a, b in sorted(bands)]
     if not polys:
         return
     for contour in union_contours(polys):
@@ -151,29 +158,38 @@ def draw_glyph(pen, cells):
 
 
 def build():
-    grids = parse_spec()
-    order = [".notdef", "space"] + list(grids.keys())
+    grids = parse_spec()   # uppercase A-Z, digits, punctuation (from the spec)
+    letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+
+    notdef_cells = ({(r, 0) for r in range(7)} | {(r, 6) for r in range(7)}
+                    | {(0, c) for c in range(7)} | {(6, c) for c in range(7)})
+
+    # render spec per glyph: (cells, cell_height). Lowercase reuses the
+    # uppercase grid but with a 1:1 cell, so it sits as small caps in the
+    # bottom square of the uppercase area.
+    render = {".notdef": (notdef_cells, H), "space": (set(), H)}
+    for name, cells in grids.items():
+        render[name] = (cells, H)
+    for ch in letters:
+        render[ch.lower()] = (grids[ch], LOWER_H)
+
+    order = [".notdef", "space"] + list(grids.keys()) + [c.lower() for c in letters]
 
     cmap = {0x20: "space"}
-    for i, ch in enumerate("ABCDEFGHIJKLMNOPQRSTUVWXYZ"):
-        cmap[0x41 + i] = ch
-    for i, name in enumerate(
-        ["zero", "one", "two", "three", "four",
-         "five", "six", "seven", "eight", "nine"]):
-        cmap[0x30 + i] = name
+    for name in grids:
+        cmap[CODEPOINTS[name]] = name
+    for ch in letters:
+        cmap[ord(ch.lower())] = ch.lower()
 
     fb = FontBuilder(1000, isTTF=True)
     fb.setupGlyphOrder(order)
     fb.setupCharacterMap(cmap)
 
-    notdef_cells = ({(r, 0) for r in range(7)} | {(r, 6) for r in range(7)}
-                    | {(0, c) for c in range(7)} | {(6, c) for c in range(7)})
-    all_grids = {".notdef": notdef_cells, "space": set(), **grids}
-
     glyf = {}
     for name in order:
         pen = TTGlyphPen(None)
-        draw_glyph(pen, all_grids[name])
+        cells, h = render[name]
+        draw_glyph(pen, cells, h)
         glyf[name] = pen.glyph()
     fb.setupGlyf(glyf)
 
@@ -195,12 +211,13 @@ def build():
         "psName": "HeisenMICR-Regular",
         "manufacturer": "Heisencoder Consulting LLC",
         "description": "MICR-style display font built from a 7x7 grid spec. "
-                       "Blocks 1.8:1 h:w, diagonal joins, 1/8-block corner radius.",
+                       "Uppercase cell 1.8:1 h:w, lowercase small caps on a 1:1 "
+                       "cell, diagonal joins, rounded corners.",
     })
     fb.setupOS2(
         sTypoAscender=744, sTypoDescender=-48, sTypoLineGap=0,
         usWinAscent=744, usWinDescent=48,
-        sxHeight=495, sCapHeight=CAP,
+        sxHeight=XHEIGHT, sCapHeight=CAP,
         fsType=0, achVendID="HSNC", fsSelection=0x0040,
         ulUnicodeRange1=0x00000001, ulCodePageRange1=0x00000001,
         panose=dict(bFamilyType=2, bSerifStyle=0, bWeight=6, bProportion=9,
@@ -216,7 +233,8 @@ def build():
     font.save(OUT)
     print(f"OK  {OUT}")
     print(f"    glyphs={len(order)} mapped={len(cmap)} "
-          f"block={W}x{H} cap={CAP} adv={ADV} fillet={R_FILLET} band=corner-joined slope 1.8")
+          f"upper={W}x{H} lower={W}x{LOWER_H} cap={CAP} xheight={XHEIGHT} "
+          f"adv={ADV} fillet={R_FILLET}")
 
 
 if __name__ == "__main__":

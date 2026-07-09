@@ -1,32 +1,58 @@
 """Parse HeisenMICR.md — the spec file is the source of truth for glyph grids."""
 import re
+import string
 from pathlib import Path
 
 SPEC = str(Path(__file__).with_name("HeisenMICR.md"))  # spec lives beside this module
 
-DIGIT_NAMES = {
+# The ``## <char>`` heading in the spec is the literal character; this maps the
+# ones that need a PostScript-safe glyph name (letters A-Z name themselves).
+GLYPH_NAMES = {
     "0": "zero", "1": "one", "2": "two", "3": "three", "4": "four",
     "5": "five", "6": "six", "7": "seven", "8": "eight", "9": "nine",
+    "!": "exclam", '"': "quotedbl", "#": "numbersign", "$": "dollar",
+    "%": "percent", "&": "ampersand", "'": "quotesingle", "(": "parenleft",
+    ")": "parenright", "*": "asterisk", "+": "plus", ",": "comma",
+    "-": "hyphen", ".": "period", "/": "slash", ":": "colon",
+    ";": "semicolon", "<": "less", "=": "equal", ">": "greater",
+    "?": "question", "@": "at", "[": "bracketleft", "\\": "backslash",
+    "]": "bracketright", "^": "asciicircum", "_": "underscore",
+    "`": "grave", "{": "braceleft", "|": "bar", "}": "braceright",
+    "~": "asciitilde",
 }
+
+# glyph name -> Unicode code point (letters + everything in GLYPH_NAMES)
+CODEPOINTS = {ch: ord(ch) for ch in string.ascii_uppercase}
+CODEPOINTS.update({name: ord(ch) for ch, name in GLYPH_NAMES.items()})
+
+# how many ``## <char>`` sections the spec is expected to define
+EXPECTED_GLYPHS = len(string.ascii_uppercase) + len(GLYPH_NAMES)
 
 
 def parse_spec(path=SPEC):
-    """Return {glyph_name: set of (row, col)} plus raw grids for reporting."""
+    """Return {glyph_name: set of (row, col)} parsed from the ASCII-art grids."""
     text = open(path).read()
-    sections = re.findall(r"^## (\S+)\s*\n+```\n(.*?)```", text, re.M | re.S)
+    sections = re.findall(r"^## (\S+)[^\n]*\n+```\n(.*?)```", text, re.M | re.S)
     glyphs = {}
     for key, block in sections:
-        name = DIGIT_NAMES.get(key, key)
-        rows = block.rstrip("\n").split("\n")
+        name = GLYPH_NAMES.get(key, key)
+        # split into rows without eating legitimately-empty trailing rows: the
+        # capture ends just before the closing fence, so drop only that one
+        # newline, then pad short grids (omitted trailing blank rows) up to 7.
+        rows = [line.rstrip("\r") for line in block.split("\n")]
+        if rows and rows[-1] == "":
+            rows.pop()
+        assert len(rows) <= 7, f"{key}: {len(rows)} rows (expected <= 7)"
+        rows += [""] * (7 - len(rows))
         cells = set()
         for r, line in enumerate(rows):
             for c, ch in enumerate(line):
                 if ch == "#":
                     cells.add((r, c))
-        assert len(rows) == 7, f"{key}: {len(rows)} rows (expected 7)"
         assert all(c <= 6 for _, c in cells), f"{key}: column beyond 6"
         glyphs[name] = cells
-    assert len(glyphs) == 36, f"parsed {len(glyphs)} glyphs, expected 36"
+    assert len(glyphs) == EXPECTED_GLYPHS, \
+        f"parsed {len(glyphs)} glyphs, expected {EXPECTED_GLYPHS}"
     return glyphs
 
 

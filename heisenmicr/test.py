@@ -120,13 +120,13 @@ def main():
         ch = chr(cmap[name])
         bad = raster_check(name, ch, cells)
 
+        # one outer contour per solid component (islands such as the two dots
+        # inside 0 are allowed), inner contours == enclosed grid holes.
         ok_outer = n_outer == comp
         ok_holes = n_inner == exp_h
         ok = ok_outer and ok_holes and stable and not bad
         note = ""
-        if name == "zero" and comp == 2 and ok_outer and ok_holes:
-            note = "  (island per spec drawing)"
-        elif not ok:
+        if not ok:
             failures += 1
             note = "  FAIL"
             if bad:
@@ -135,8 +135,8 @@ def main():
               f"{exp_h:>5} {str(stable):>6} {str(not bad):>6}{note}")
 
     print(f"\n{'PASS' if failures == 0 else f'{failures} FAILURES'}: "
-          "single-outline assertion holds for 35/36 glyphs; "
-          "zero is 2 components as drawn (documented exception).")
+          f"{len(grids)} glyphs render as one outline per solid component "
+          "(islands allowed) with holes matching the grid.")
     return failures
 
 

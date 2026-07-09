@@ -11,7 +11,7 @@ HERE = Path(__file__).parent
 TTF = str(HERE / "HeisenMICR.ttf")
 OUT = str(HERE / "specimen_heisenmicr.png")
 
-W, H = 1850, 1150
+W, H = 1850, 1180
 BG = "#15110C"
 ORANGE = "#CC4E00"
 CREAM = "#E8E2D5"
@@ -19,7 +19,8 @@ GREEN = "#8A9A4B"
 GRAY = "#6E6A62"
 DIM = "#4A4640"
 
-SUBTITLE = "V120  CONTINUOUS DIAGONALS  DOUBLE SPACING"
+SUBTITLE = "V130  SMALL-CAPS LOWERCASE  FULL ASCII"
+PUNCT = "!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~"
 
 
 def label_font(size):
@@ -48,24 +49,32 @@ def render():
     d.line([(left, 262), (760, 262)], fill=ORANGE, width=3)
 
     y = 285
-    for line in ("ABCDEFGHIJKLM", "NOPQRSTUVWXYZ", "0123456789"):
-        d.text((left, y), line, font=font(96), fill=CREAM)
-        y += 118
-
-    d.line([(left, y + 8), (470, y + 8)], fill=GREEN, width=2)
-    y += 34
-    d.text((left, y), "THE QUICK BROWN FOX JUMPS OVER THE LAZY DOG",
-           font=font(42), fill=CREAM)
-    y += 70
-    d.text((left, y), "SPHINX OF BLACK QUARTZ JUDGE MY VOW",
-           font=font(42), fill=GRAY)
-    y += 90
+    for line in ("ABCDEFGHIJKLM", "NOPQRSTUVWXYZ"):
+        d.text((left, y), line, font=font(94), fill=CREAM)
+        y += 114
+    # lowercase small caps + digits
+    d.text((left, y), "abcdefghijklmnopqrstuvwxyz", font=font(64), fill=GREEN)
+    y += 84
+    d.text((left, y), "0123456789", font=font(64), fill=CREAM)
+    y += 84
+    d.text((left, y), PUNCT, font=font(46), fill=GRAY)
+    y += 74
 
     d.line([(left, y), (470, y)], fill=GREEN, width=2)
     y += 26
-    d.text((left, y), "HEISENCODER CONSULTING LLC", font=font(46), fill=ORANGE)
+    # mixed case shows the small-cap lowercase against the capitals
+    d.text((left, y), "The quick brown fox jumps over the lazy dog",
+           font=font(40), fill=CREAM)
+    y += 66
+    d.text((left, y), "Sphinx of black quartz, judge my vow!",
+           font=font(40), fill=GRAY)
+    y += 86
+
+    d.line([(left, y), (470, y)], fill=GREEN, width=2)
+    y += 26
+    d.text((left, y), "Heisencoder Consulting LLC", font=font(46), fill=ORANGE)
     y += 78
-    d.text((left, y), "AI ASSISTED SOFTWARE ENGINEERING 2026",
+    d.text((left, y), "AI-Assisted Software Engineering 2026",
            font=font(28), fill=GREEN)
 
     # size ramp on the right
