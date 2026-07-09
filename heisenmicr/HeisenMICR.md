@@ -38,8 +38,8 @@ For each character, test that these assertions are true.
 #     #
 #     #
 ######
-##   ##
-##   ##
+##    #
+##    #
 ######
 ```
 
@@ -100,7 +100,7 @@ For each character, test that these assertions are true.
 ##  ###
 ##    #
 ##    #
-######
+ #####
 ```
 
 ## H
@@ -238,13 +238,13 @@ For each character, test that these assertions are true.
 ## S
 
 ```
- #####
+ ######
 #
 #
  #####
      ##
      ##
- #####
+######
 ```
 
 ## T
