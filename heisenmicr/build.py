@@ -10,6 +10,7 @@ Pipeline per glyph:
   5. TTGlyphPen -> glyf
 """
 import math
+from pathlib import Path
 
 from fontTools.fontBuilder import FontBuilder
 from fontTools.pens.recordingPen import RecordingPen
@@ -17,7 +18,8 @@ from fontTools.pens.ttGlyphPen import TTGlyphPen
 from fontTools.misc.timeTools import timestampNow
 import pathops
 
-from spec import parse_spec, pure_diagonal_pairs
+from spec import (parse_spec, pure_diagonal_pairs, stem_junction_pairs,
+                  corner_bevel_pairs)
 
 # ── Geometry constants ──────────────────────────────────────────
 W, H = 55, 99            # block size, 1.8:1 exact
@@ -26,8 +28,8 @@ ADV = 9 * W              # 495: 7-block body + 2-block gap
 CAP = 7 * H              # 693
 R_FILLET = 14            # 1/4 of block width
 
-OUT = "/home/claude/heisenmicr/HeisenMICR.ttf"
-VERSION = "1.100"
+OUT = str(Path(__file__).with_name("HeisenMICR.ttf"))
+VERSION = "1.200"
 
 
 def cell_rect(r, c):
@@ -122,7 +124,12 @@ def fillet_contour(pts, radius):
 
 def draw_glyph(pen, cells):
     polys = [cell_rect(r, c) for (r, c) in sorted(cells)]
-    polys += [join_band(a, b) for a, b in pure_diagonal_pairs(cells)]
+    # diagonal join bands: isolated staircases (pure), diagonals running into a
+    # stem (stem junction), and stair-stepped outer corners (corner bevel). The
+    # rules can name the same pair, so dedupe before drawing.
+    bands = (set(pure_diagonal_pairs(cells)) | set(stem_junction_pairs(cells))
+             | set(corner_bevel_pairs(cells)))
+    polys += [join_band(a, b) for a, b in sorted(bands)]
     if not polys:
         return
     for contour in union_contours(polys):

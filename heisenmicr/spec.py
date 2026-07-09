@@ -1,7 +1,8 @@
 """Parse HeisenMICR.md — the spec file is the source of truth for glyph grids."""
 import re
+from pathlib import Path
 
-SPEC = "/home/claude/heisenmicr/HeisenMICR.md"  # local copy, O corrected per review
+SPEC = str(Path(__file__).with_name("HeisenMICR.md"))  # spec lives beside this module
 
 DIGIT_NAMES = {
     "0": "zero", "1": "one", "2": "two", "3": "three", "4": "four",
@@ -38,6 +39,78 @@ def pure_diagonal_pairs(cells):
             if b in cells and (r + 1, c) not in cells and (r, c + dc) not in cells:
                 pairs.append(((r, c), b))
     return pairs
+
+
+def stem_junction_pairs(cells):
+    """Diagonal pairs where a diagonal stroke runs into a stem.
+
+    A ``pure_diagonal_pair`` renders as a smooth slanted stroke only when it is
+    isolated (both mutual-orthogonal "notch" cells empty). Where such a stroke
+    terminates against a stem, the terminating step has exactly one notch cell
+    filled (the stem), so it is not "pure" and the stroke would stair-step into
+    the stem. This returns those terminating steps — the diagonal pairs that
+    continue an existing pure stroke by one cell into a stem — so the build can
+    add a join band there and let the diagonal run cleanly into the stem.
+    """
+    pure = set(pure_diagonal_pairs(cells))
+    out = []
+    for (r, c) in cells:
+        for dc in (+1, -1):
+            b = (r + 1, c + dc)
+            if b not in cells:
+                continue
+            below_a = (r + 1, c) in cells
+            beside_a = (r, c + dc) in cells
+            if below_a + beside_a != 1:        # 0 = pure, 2 = solid interior
+                continue
+            # continues a pure stroke of the same direction from either end
+            predecessor = ((r - 1, c - dc), (r, c))
+            successor = (b, (r + 2, c + 2 * dc))
+            if predecessor in pure or successor in pure:
+                out.append(((r, c), b))
+    return out
+
+
+def corner_bevel_pairs(cells):
+    """Diagonal pairs that bevel a stair-stepped corner on the glyph's outer edge.
+
+    A junction with exactly one filled notch is a unit stair-step where two
+    strokes meet. We bevel it into a single diagonal when both of these hold:
+
+      * the empty (clipped) notch lies on the outer boundary of the 7x7 grid, so
+        the step is a corner of the letterform rather than an interior detail; and
+      * the stroke running through ``A`` does not continue straight past the
+        junction — the cell opposite the filled notch is empty — so it is a
+        genuine corner/reversal, not a branch that keeps going.
+
+    This captures the prominent "the corner should be diagonal" cases (B
+    lower-right, Q upper-left, U lower-left, the top-left/bottom-right of S) plus
+    S's two mid-height reversal curves, while leaving branch shoulders (A, H) and
+    stubs (J, 4) as crisp steps. Diagonal strokes that simply run out to a
+    bounding-box corner (M, N, W, X, Z, 1) also qualify, matching what
+    ``stem_junction_pairs`` already does for those.
+    """
+    out = []
+    for (r, c) in cells:
+        for dc in (+1, -1):
+            b = (r + 1, c + dc)
+            if b not in cells:
+                continue
+            below_a = (r + 1, c) in cells
+            beside_a = (r, c + dc) in cells
+            if below_a + beside_a != 1:
+                continue
+            empty_notch = (r + 1, c) if not below_a else (r, c + dc)
+            if empty_notch[0] not in (0, 6) and empty_notch[1] not in (0, 6):
+                continue
+            # opposite the filled notch across A: filled => stroke runs straight on
+            if below_a:                       # filled notch below A -> check above
+                runs_through = (r - 1, c) in cells
+            else:                             # filled notch beside A -> check behind
+                runs_through = (r, c - dc) in cells
+            if not runs_through:
+                out.append(((r, c), b))
+    return out
 
 
 def solid_components(cells):
@@ -84,9 +157,13 @@ def expected_holes(cells):
     return holes
 
 
-if __name__ == "__main__":
+def main():
     g = parse_spec()
     print(f"{'glyph':>6} {'cells':>5} {'diag':>4} {'comp':>4} {'holes':>5}")
     for name, cells in g.items():
         print(f"{name:>6} {len(cells):>5} {len(pure_diagonal_pairs(cells)):>4} "
               f"{solid_components(cells):>4} {expected_holes(cells):>5}")
+
+
+if __name__ == "__main__":
+    main()
