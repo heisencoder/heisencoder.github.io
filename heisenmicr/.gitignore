@@ -1,0 +1,12 @@
+# uv / virtualenv
+.venv/
+
+# Python caches
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Generated proof sheets (regenerate with `uv run preview.py`)
+proof_grid.png
+proof_text.png
+proof_close.png
