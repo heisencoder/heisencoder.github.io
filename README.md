@@ -57,11 +57,24 @@ field or a malformed date fails the build instead of shipping a broken page.
 
 ## Fonts
 
-IBM Plex Mono is **self-hosted** in `public/fonts/` (woff2, weights 400/500/700,
-latin + latin-ext) and declared via `@font-face` in `src/styles/global.css` — so
-the site makes no render-blocking request to Google's font servers. The rules use
-`font-display: optional`, so the font never swaps mid-view and contributes no
-layout shift (CLS).
+The **body** text is IBM Plex Mono; **titles and headings** use **HeisenMICR**, a
+monospaced MICR-style display face. Both are **self-hosted** in `public/fonts/`
+(woff2) and declared via `@font-face` in `src/styles/global.css` — so the site
+makes no render-blocking request to Google's font servers. The rules use
+`font-display: optional`, so a font never swaps mid-view and contributes no
+layout shift (CLS); both are preloaded in `Layout.astro`.
+
+`public/fonts/HeisenMICR.woff2` is derived from `heisenmicr/HeisenMICR.ttf` (the
+committed build artifact of the font tooling in `heisenmicr/`):
+
+```sh
+python -c "from fontTools.ttLib import TTFont; f=TTFont('heisenmicr/HeisenMICR.ttf'); f.flavor='woff2'; f.save('public/fonts/HeisenMICR.woff2')"
+```
+
+Regenerate it whenever `heisenmicr/HeisenMICR.ttf` changes (requires `fonttools`
++ `brotli`). HeisenMICR ships a single weight and covers ASCII only, so headings
+set `font-synthesis: none` (no faux-bold) and fall back per-glyph to the mono
+stack for any non-ASCII character.
 
 ## Quality checks
 

@@ -72,6 +72,25 @@
   unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
 }
 
+/* -------------------------------------------------------------------------
+   HeisenMICR — a monospaced MICR-style display face, used only for titles and
+   headings. Built from an ASCII-art spec (see heisenmicr/); lowercase renders
+   as small caps at 5/7 of the cap height. It covers A–Z, a–z, digits, and ASCII
+   punctuation — any other glyph falls back per-character to the mono stack.
+
+   font-display: optional (same rationale as the body font above): the heading
+   font is only used if it's ready within the block window, and never swaps in
+   after paint — so it contributes zero layout shift (CLS). It's preloaded in
+   Layout.astro so it's ready for the above-the-fold hero title on first paint.
+   ------------------------------------------------------------------------- */
+@font-face {
+  font-family: 'HeisenMICR';
+  font-style: normal;
+  font-weight: 400;
+  font-display: optional;
+  src: url('/fonts/HeisenMICR.woff2') format('woff2');
+}
+
 :root {
   /* Brand palette */
   --mint: #1f9e6f;          /* primary — mint green (fills, borders, accents) */
@@ -95,6 +114,8 @@
   /* Typography — fixed-width throughout */
   --mono: 'IBM Plex Mono', 'JetBrains Mono', 'SFMono-Regular', 'Menlo',
     'Consolas', 'Liberation Mono', monospace;
+  /* Display face for titles + headings; falls back to the mono stack. */
+  --display: 'HeisenMICR', var(--mono);
 
   /* Rhythm */
   --maxw: 64rem;
@@ -171,9 +192,14 @@ h1,
 h2,
 h3,
 h4 {
+  font-family: var(--display);
   line-height: 1.2;
   font-weight: 700;
-  letter-spacing: -0.01em;
+  /* HeisenMICR ships a single (400) weight; the 700 above is honored by the
+     mono fallback (which has a real bold), while font-synthesis: none stops the
+     browser from faux-bolding HeisenMICR and distorting its MICR glyphs. */
+  font-synthesis: none;
+  letter-spacing: normal;
   margin: 0 0 0.6em;
 }
 
