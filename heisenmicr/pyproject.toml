@@ -1,0 +1,26 @@
+[project]
+name = "heisenmicr"
+version = "1.1.0"
+description = "HeisenMICR — a MICR-style display font built from a 7x7 grid spec, plus its build/test/preview tooling."
+readme = "HeisenMICR.md"
+requires-python = ">=3.10"
+dependencies = [
+    "fonttools>=4.50",
+    "skia-pathops>=0.8",
+    "pillow>=10.0",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0",
+]
+
+# build.py / test.py / spec.py / preview.py are flat, co-importing scripts rather
+# than an installable package. Tell uv to manage the environment (deps only) and
+# run them with `uv run <script>.py` instead of trying to build/install a wheel.
+[tool.uv]
+package = false
+
+[tool.pytest.ini_options]
+addopts = "-q"
+testpaths = ["tests"]
