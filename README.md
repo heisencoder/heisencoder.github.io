@@ -50,7 +50,7 @@ field or a malformed date fails the build instead of shipping a broken page.
 
 ## Editing content
 
-- **Site-wide info** (name, tagline, email, social links, nav): `src/consts.ts`.
+- **Site-wide info** (name, tagline, social links, nav): `src/consts.ts`.
 - **Home page copy**: `src/pages/index.astro`.
 - **Colors / fonts / spacing**: the CSS custom properties at the top of
   `src/styles/global.css` (`--mint`, `--orange`, `--paper`, `--mono`, ...).

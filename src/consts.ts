@@ -7,7 +7,6 @@ export const SITE = {
   tagline: 'Software engineer, tinkerer, and occasional blogger.',
   description:
     "Matt Ball (heisencoder) — software engineer. Home base for my writing, my projects, and links to where I am elsewhere on the web.",
-  email: 'matt.ball@heisencoder.net',
 };
 
 // Where to find me elsewhere on the web. Rendered as cards on the home page and
