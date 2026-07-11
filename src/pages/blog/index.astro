@@ -40,6 +40,7 @@ const fmtDate = (d: Date) =>
                   <time datetime={post.data.pubDate.toISOString()}>
                     {fmtDate(post.data.pubDate)}
                   </time>
+                  <span class="post-list__by">{`· ${post.data.author}`}</span>
                   {post.data.tags.length > 0 && (
                     <span class="post-list__tags">
                       {post.data.tags.map((t) => (

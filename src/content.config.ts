@@ -14,6 +14,8 @@ const blog = defineCollection({
     pubDate: z.coerce.date(),
     updatedDate: z.coerce.date().optional(),
     tags: z.array(z.string()).default([]),
+    // Byline. Defaults to the site owner; set explicitly for guest/AI authors.
+    author: z.string().default('Matt Ball'),
     draft: z.boolean().default(false),
   }),
 });

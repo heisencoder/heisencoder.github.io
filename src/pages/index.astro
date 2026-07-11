@@ -115,6 +115,7 @@ const fmtDate = (d: Date) =>
                   <time datetime={post.data.pubDate.toISOString()}>
                     {fmtDate(post.data.pubDate)}
                   </time>
+                  {` · ${post.data.author}`}
                 </p>
                 <p class="post-list__desc">{post.data.description}</p>
               </li>
