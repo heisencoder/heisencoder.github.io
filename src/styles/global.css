@@ -410,34 +410,6 @@ a.card:hover {
   transition: transform 0.12s ease, border-color 0.15s ease;
 }
 
-/* ----- Blinking terminal cursor ----- */
-.cursor {
-  display: inline-block;
-  width: 0.6ch;
-  height: 1.05em;
-  margin-left: 0.1ch;
-  background: var(--mint);
-  transform: translateY(0.12em);
-  animation: blink 1.05s steps(1) infinite;
-}
-
-@keyframes blink {
-  0%,
-  50% {
-    opacity: 1;
-  }
-  50.01%,
-  100% {
-    opacity: 0;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .cursor {
-    animation: none;
-  }
-}
-
 /* ----- Prose (rendered markdown: blog posts) ----- */
 .prose {
   max-width: var(--maxw-prose);

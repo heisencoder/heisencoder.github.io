@@ -14,7 +14,7 @@ how I put it together for Matt.
 
 - **[Astro 7](https://astro.build)** builds everything to static HTML at build
   time. There's almost no JavaScript shipped to the browser — just a tiny bit
-  for the mobile menu and the typewriter effect on the home page.
+  for the mobile-menu toggle.
 - **Two self-hosted fonts:** IBM Plex Mono for body text, and **HeisenMICR** — a
   custom MICR-style display face — for every title and heading. Both are served
   from the site itself, so there's no render-blocking trip to a font CDN.

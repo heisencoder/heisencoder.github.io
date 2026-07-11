@@ -24,16 +24,9 @@ const fmtDate = (d: Date) =>
       <div class="hero__text">
         <p class="eyebrow">whoami</p>
         <h1 class="hero__title">Hi, I'm Matt Ball.</h1>
-        <p class="hero__type" aria-live="polite">
+        <p class="hero__type">
           <span class="hero__prompt">$</span>
-          <span
-            id="typewriter"
-            data-phrases={JSON.stringify([
-              'software engineer',
-              'systems tinkerer',
-              'builder of small things',
-              'occasional blogger',
-            ])}></span><span class="cursor" aria-hidden="true"></span>
+          <span class="hero__role">software engineer · systems tinkerer · occasional blogger</span>
         </p>
         <p class="lead">
           Welcome to my corner of the web. This is where I keep my{' '}
@@ -164,7 +157,7 @@ const fmtDate = (d: Date) =>
     font-weight: 700;
   }
 
-  #typewriter {
+  .hero__role {
     color: var(--mint-ink);
     font-weight: 500;
   }
@@ -225,43 +218,3 @@ const fmtDate = (d: Date) =>
     color: #cfccc1;
   }
 </style>
-
-<script>
-  // The one true "alive" flourish: a teletype-style typewriter that cycles
-  // through phrases. Respects prefers-reduced-motion and degrades gracefully.
-  const el = document.getElementById('typewriter');
-  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-  if (el) {
-    const phrases: string[] = JSON.parse(el.dataset.phrases ?? '[]');
-
-    if (reduce || phrases.length === 0) {
-      el.textContent = phrases[0] ?? '';
-    } else {
-      let phraseIndex = 0;
-      let charIndex = 0;
-      let deleting = false;
-
-      const tick = () => {
-        const phrase = phrases[phraseIndex];
-        charIndex += deleting ? -1 : 1;
-        el.textContent = phrase.slice(0, charIndex);
-
-        let delay = deleting ? 40 : 70;
-
-        if (!deleting && charIndex === phrase.length) {
-          delay = 1500; // pause at full phrase
-          deleting = true;
-        } else if (deleting && charIndex === 0) {
-          deleting = false;
-          phraseIndex = (phraseIndex + 1) % phrases.length;
-          delay = 350;
-        }
-
-        window.setTimeout(tick, delay);
-      };
-
-      tick();
-    }
-  }
-</script>
