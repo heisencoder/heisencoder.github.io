@@ -1,0 +1,111 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import PageHeader from '../../components/PageHeader.astro';
+import { getCollection } from 'astro:content';
+
+// All published posts, newest first.
+const posts = (await getCollection('blog', ({ data }) => !data.draft)).sort(
+  (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
+);
+
+const fmtDate = (d: Date) =>
+  d.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    timeZone: 'UTC',
+  });
+---
+
+<Layout
+  title="Blog"
+  description="Writing on software, side projects, and whatever else I'm tinkering with."
+>
+  <PageHeader
+    eyebrow="Blog"
+    title="Writing"
+    lead="Notes on software, side projects, and whatever else I'm tinkering with."
+  />
+
+  <section class="section">
+    <div class="container container--prose">
+      {
+        posts.length === 0 ? (
+          <p class="lead">No posts yet — the first one is on its way.</p>
+        ) : (
+          <ul class="post-list">
+            {posts.map((post) => (
+              <li class="post-list__item">
+                <p class="post-list__meta">
+                  <time datetime={post.data.pubDate.toISOString()}>
+                    {fmtDate(post.data.pubDate)}
+                  </time>
+                  <span class="post-list__by">{`· ${post.data.author}`}</span>
+                  {post.data.tags.length > 0 && (
+                    <span class="post-list__tags">
+                      {post.data.tags.map((t) => (
+                        <span class="tag">#{t}</span>
+                      ))}
+                    </span>
+                  )}
+                </p>
+                <h2 class="post-list__title">
+                  <a href={`/blog/${post.id}/`}>{post.data.title}</a>
+                </h2>
+                <p class="post-list__desc">{post.data.description}</p>
+              </li>
+            ))}
+          </ul>
+        )
+      }
+    </div>
+  </section>
+</Layout>
+
+<style>
+  .post-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 2.5rem;
+    max-width: none;
+  }
+
+  .post-list__item {
+    padding-bottom: 2rem;
+    border-bottom: 1px dashed var(--rule);
+  }
+
+  .post-list__meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem;
+    margin: 0 0 0.4rem;
+    font-size: 0.82rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+  }
+
+  .post-list__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .tag {
+    color: var(--mint-ink);
+  }
+
+  .post-list__title {
+    font-size: clamp(1.3rem, 3vw, 1.7rem);
+    margin: 0 0 0.5rem;
+  }
+
+  .post-list__desc {
+    color: var(--ink-soft);
+    margin: 0;
+  }
+</style>

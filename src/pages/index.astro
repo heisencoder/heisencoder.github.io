@@ -1,0 +1,220 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { getCollection } from 'astro:content';
+import { SOCIAL } from '../consts';
+
+// Latest few posts for the home-page teaser (drafts excluded, newest first).
+const posts = (await getCollection('blog', ({ data }) => !data.draft))
+  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
+  .slice(0, 3);
+
+const fmtDate = (d: Date) =>
+  d.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    timeZone: 'UTC',
+  });
+---
+
+<Layout>
+  <!-- ===== Hero ===== -->
+  <section class="section hero">
+    <div class="container hero__inner">
+      <div class="hero__text">
+        <p class="eyebrow">whoami</p>
+        <h1 class="hero__title">Hi, I'm Matt Ball.</h1>
+        <p class="hero__type">
+          <span class="hero__prompt">$</span>
+          <span class="hero__role">software engineer · systems tinkerer · occasional blogger</span>
+        </p>
+        <p class="lead">
+          Welcome to my corner of the web. This is where I keep my{' '}
+          <a href="/blog/">writing</a>, showcase a few side projects, and point
+          to where to find me elsewhere online.
+        </p>
+        <div class="hero__actions">
+          <a class="btn btn--primary" href="https://github.com/heisencoder/" target="_blank" rel="noopener">GitHub</a>
+          <a class="btn btn--ghost" href="https://www.linkedin.com/in/matthewvball/" target="_blank" rel="noopener">LinkedIn</a>
+          <a class="btn btn--ghost" href="/blog/">Read the blog</a>
+        </div>
+      </div>
+      <img
+        class="hero__photo"
+        src="/img/matt-ball.jpeg"
+        alt="Matt Ball"
+        width="200"
+        height="200"
+        fetchpriority="high"
+      />
+    </div>
+  </section>
+
+  <!-- ===== Around the web ===== -->
+  <section class="section section--tight">
+    <div class="container">
+      <p class="eyebrow">Find me elsewhere</p>
+      <h2>Around the web</h2>
+      <div class="grid grid--2" style="margin-top: 2rem;">
+        {
+          SOCIAL.map((s) => (
+            <a class="card card--accent" href={s.href} target="_blank" rel="noopener">
+              <span class="card__tag">{s.label}</span>
+              <h3>{s.handle}</h3>
+              <p>{s.blurb}</p>
+            </a>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Projects ===== -->
+  <section class="section">
+    <div class="container">
+      <p class="eyebrow">What I build</p>
+      <h2>Projects</h2>
+      <p>
+        I host a handful of small projects and experiments. A proper showcase is
+        on the way — for now, they live over on{' '}
+        <a href="https://github.com/heisencoder/" target="_blank" rel="noopener">GitHub</a>.
+      </p>
+      <div class="grid grid--3" style="margin-top: 2rem;">
+        <article class="card">
+          <span class="card__tag">// soon</span>
+          <h3>Coming soon</h3>
+          <p>Project write-ups and live demos will land here.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Latest from the blog ===== -->
+  <section class="section section--dark">
+    <div class="container">
+      <p class="eyebrow">From the blog</p>
+      <h2>Latest posts</h2>
+      {
+        posts.length === 0 ? (
+          <p class="lead">The first post is on its way. Check back soon.</p>
+        ) : (
+          <ul class="post-list">
+            {posts.map((post) => (
+              <li class="post-list__item">
+                <a class="post-list__link" href={`/blog/${post.id}/`}>
+                  {post.data.title}
+                </a>
+                <p class="post-list__meta">
+                  <time datetime={post.data.pubDate.toISOString()}>
+                    {fmtDate(post.data.pubDate)}
+                  </time>
+                  {` · ${post.data.author}`}
+                </p>
+                <p class="post-list__desc">{post.data.description}</p>
+              </li>
+            ))}
+          </ul>
+        )
+      }
+      <p style="margin-top: 2rem;">
+        <a href="/blog/">See all posts &rarr;</a>
+      </p>
+    </div>
+  </section>
+</Layout>
+
+<style>
+  .hero {
+    padding-top: clamp(3rem, 8vw, 6rem);
+  }
+
+  .hero__inner {
+    display: grid;
+    gap: 2.5rem;
+    align-items: center;
+  }
+
+  @media (min-width: 46rem) {
+    .hero__inner {
+      grid-template-columns: 1fr auto;
+    }
+  }
+
+  .hero__title {
+    max-width: 18ch;
+    margin-bottom: 0.5rem;
+  }
+
+  .hero__type {
+    font-size: clamp(1.1rem, 2.4vw, 1.5rem);
+    color: var(--ink);
+    margin-bottom: 1.25rem;
+  }
+
+  .hero__prompt {
+    color: var(--orange);
+    margin-right: 0.6ch;
+    font-weight: 700;
+  }
+
+  .hero__role {
+    color: var(--mint-ink);
+    font-weight: 500;
+  }
+
+  .hero__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.85rem;
+    margin-top: 0.5rem;
+  }
+
+  .hero__photo {
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    border: 3px solid var(--mint);
+    object-fit: cover;
+    justify-self: center;
+    order: -1;
+  }
+
+  @media (min-width: 46rem) {
+    .hero__photo {
+      order: 0;
+    }
+  }
+
+  /* Blog teaser list (on the dark band) */
+  .post-list {
+    list-style: none;
+    margin: 2rem 0 0;
+    padding: 0;
+    display: grid;
+    gap: 1.75rem;
+    max-width: none;
+  }
+
+  .post-list__item {
+    padding-bottom: 1.5rem;
+    border-bottom: 1px dashed #2f3026;
+  }
+
+  .post-list__link {
+    font-size: 1.2rem;
+    font-weight: 700;
+  }
+
+  .post-list__meta {
+    margin: 0.35rem 0 0.4rem;
+    font-size: 0.82rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #9d9a8f;
+  }
+
+  .post-list__desc {
+    margin: 0;
+    color: #cfccc1;
+  }
+</style>
