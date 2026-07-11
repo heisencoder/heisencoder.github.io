@@ -30,8 +30,6 @@ const year = new Date().getFullYear();
 
   <div class="container site-footer__bar">
     <span>© {year} {SITE.name}</span>
-    <span class="site-footer__sep">·</span>
-    <a href={`mailto:${SITE.email}`}>{SITE.email}</a>
   </div>
 </footer>
 
@@ -98,13 +96,5 @@ const year = new Date().getFullYear();
     border-top: 1px solid #2a2b22;
     font-size: 0.88rem;
     color: #8c8a80;
-  }
-
-  .site-footer__bar a {
-    color: var(--mint-bright);
-  }
-
-  .site-footer__sep {
-    color: #4a4b40;
   }
 </style>
