@@ -14,4 +14,14 @@ export default defineConfig({
   // enforces this — but a stray slash-less URL still works rather than 404ing.
   trailingSlash: 'ignore',
   integrations: [sitemap()],
+  markdown: {
+    // Emit both a light and a dark syntax theme as CSS custom properties
+    // (--shiki-light / --shiki-dark and their -bg variants) rather than a
+    // single hard-coded color set. global.css then selects the set that
+    // matches the active theme, so fenced code blocks follow light/dark mode.
+    shikiConfig: {
+      themes: { light: 'github-light', dark: 'github-dark' },
+      defaultColor: false,
+    },
+  },
 });

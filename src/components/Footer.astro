@@ -35,9 +35,10 @@ const year = new Date().getFullYear();
 
 <style>
   .site-footer {
-    background: var(--ink-dark-surface);
-    color: #cfccc1;
+    background: var(--footer-bg);
+    color: var(--footer-ink);
     padding-block: clamp(2.5rem, 5vw, 3.5rem) 1.5rem;
+    border-top: 1px solid var(--footer-rule);
   }
 
   .site-footer__inner {
@@ -54,16 +55,16 @@ const year = new Date().getFullYear();
 
   .site-footer__name {
     font-weight: 700;
-    color: #fff;
+    color: var(--footer-heading);
     margin-bottom: 0.4rem;
   }
 
   .prompt {
-    color: var(--mint-bright);
+    color: var(--accent-cool);
   }
 
   .site-footer__tag {
-    color: #cfccc1;
+    color: var(--footer-ink);
     margin: 0;
   }
 
@@ -77,13 +78,13 @@ const year = new Date().getFullYear();
   }
 
   .site-footer__nav a {
-    color: #cfccc1;
+    color: var(--footer-ink);
     font-size: 0.95rem;
   }
 
   .site-footer__nav a:hover {
-    color: var(--orange-bright);
-    border-bottom-color: var(--orange-bright);
+    color: var(--link-hover);
+    border-bottom-color: var(--link-hover);
   }
 
   .site-footer__bar {
@@ -93,8 +94,8 @@ const year = new Date().getFullYear();
     flex-wrap: wrap;
     margin-top: 2.5rem;
     padding-top: 1.25rem;
-    border-top: 1px solid #2a2b22;
+    border-top: 1px solid var(--footer-rule);
     font-size: 0.88rem;
-    color: #8c8a80;
+    color: var(--footer-faint);
   }
 </style>
