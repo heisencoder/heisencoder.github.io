@@ -13,35 +13,77 @@ const current = Astro.url.pathname.replace(/\/+$/, '') || '/';
       <img class="brand__mark" src="/favicon.svg" alt="" width="28" height="28" />
     </a>
 
-    <button
-      class="nav-toggle"
-      aria-expanded="false"
-      aria-controls="primary-nav"
-      aria-label="Toggle navigation menu"
-    >
-      <span class="nav-toggle__bar"></span>
-      <span class="nav-toggle__bar"></span>
-      <span class="nav-toggle__bar"></span>
-    </button>
+    <div class="site-header__right">
+      <nav id="primary-nav" class="primary-nav" aria-label="Primary">
+        <ul>
+          {
+            NAV.map((item) => {
+              const href = item.href.replace(/\/+$/, '') || '/';
+              const isActive =
+                href === '/' ? current === '/' : current.startsWith(href);
+              return (
+                <li>
+                  <a href={item.href} aria-current={isActive ? 'page' : undefined}>
+                    {item.label}
+                  </a>
+                </li>
+              );
+            })
+          }
+        </ul>
+      </nav>
 
-    <nav id="primary-nav" class="primary-nav" aria-label="Primary">
-      <ul>
-        {
-          NAV.map((item) => {
-            const href = item.href.replace(/\/+$/, '') || '/';
-            const isActive =
-              href === '/' ? current === '/' : current.startsWith(href);
-            return (
-              <li>
-                <a href={item.href} aria-current={isActive ? 'page' : undefined}>
-                  {item.label}
-                </a>
-              </li>
-            );
-          })
-        }
-      </ul>
-    </nav>
+      <button
+        class="theme-toggle"
+        type="button"
+        aria-label="Switch color theme"
+        title="Switch color theme"
+      >
+        <!-- Moon shown in light mode (click → dark); sun shown in dark mode. -->
+        <svg
+          class="theme-toggle__moon"
+          viewBox="0 0 24 24"
+          width="20"
+          height="20"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"></path>
+        </svg>
+        <svg
+          class="theme-toggle__sun"
+          viewBox="0 0 24 24"
+          width="20"
+          height="20"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <circle cx="12" cy="12" r="4"></circle>
+          <path
+            d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"
+          ></path>
+        </svg>
+      </button>
+
+      <button
+        class="nav-toggle"
+        aria-expanded="false"
+        aria-controls="primary-nav"
+        aria-label="Toggle navigation menu"
+      >
+        <span class="nav-toggle__bar"></span>
+        <span class="nav-toggle__bar"></span>
+        <span class="nav-toggle__bar"></span>
+      </button>
+    </div>
   </div>
 </header>
 
@@ -61,6 +103,13 @@ const current = Astro.url.pathname.replace(/\/+$/, '') || '/';
     justify-content: space-between;
     min-height: 4rem;
     gap: 1rem;
+  }
+
+  /* The whole right cluster: nav links, theme toggle, and (mobile) hamburger. */
+  .site-header__right {
+    display: flex;
+    align-items: center;
+    gap: 1.4rem;
   }
 
   .brand {
@@ -86,7 +135,7 @@ const current = Astro.url.pathname.replace(/\/+$/, '') || '/';
   }
 
   .brand__prompt {
-    color: var(--mint);
+    color: var(--accent-cool);
     margin-right: 0.35ch;
   }
 
@@ -110,13 +159,53 @@ const current = Astro.url.pathname.replace(/\/+$/, '') || '/';
   }
 
   .primary-nav a:hover {
-    color: var(--orange);
-    border-bottom-color: var(--orange);
+    color: var(--link-hover);
+    border-bottom-color: var(--link-hover);
   }
 
   .primary-nav a[aria-current='page'] {
     color: var(--ink);
     border-bottom-color: var(--mint);
+  }
+
+  /* ----- Theme toggle ----- */
+  .theme-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.4rem;
+    height: 2.4rem;
+    padding: 0;
+    color: var(--ink-soft);
+    background: transparent;
+    border: 1px solid var(--rule);
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: color 0.15s ease, border-color 0.15s ease;
+  }
+
+  .theme-toggle:hover {
+    color: var(--orange);
+    border-color: var(--orange);
+  }
+
+  /* Show the icon for the mode the visitor would switch TO: moon in light,
+     sun in dark. Kept at equal (class-only) specificity so neither icon is
+     accidentally revealed by a broader `svg` rule. */
+  .theme-toggle__moon {
+    display: block;
+  }
+
+  .theme-toggle__sun {
+    display: none;
+  }
+
+  :root[data-theme='dark'] .theme-toggle__moon {
+    display: none;
+  }
+
+  :root[data-theme='dark'] .theme-toggle__sun {
+    display: block;
   }
 
   .nav-toggle {
@@ -207,4 +296,47 @@ const current = Astro.url.pathname.replace(/\/+$/, '') || '/';
       }
     });
   }
+
+  // Color-theme toggle. The pre-paint script in Layout.astro has already set
+  // data-theme; here we only handle clicks (persisting an explicit choice) and,
+  // for visitors who haven't chosen, keep following the OS as it changes.
+  const root = document.documentElement;
+  const themeBtn = document.querySelector<HTMLButtonElement>('.theme-toggle');
+  const mql = window.matchMedia('(prefers-color-scheme: dark)');
+
+  const storedTheme = (): string | null => {
+    try {
+      return localStorage.getItem('theme');
+    } catch {
+      return null;
+    }
+  };
+
+  const applyTheme = (theme: 'light' | 'dark') => {
+    root.dataset.theme = theme;
+    if (themeBtn) {
+      themeBtn.setAttribute(
+        'aria-label',
+        theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'
+      );
+    }
+  };
+
+  // Sync the button label with whatever the pre-paint script resolved.
+  applyTheme(root.dataset.theme === 'dark' ? 'dark' : 'light');
+
+  themeBtn?.addEventListener('click', () => {
+    const next = root.dataset.theme === 'dark' ? 'light' : 'dark';
+    try {
+      localStorage.setItem('theme', next);
+    } catch {
+      /* ignore write failures (e.g. private mode) */
+    }
+    applyTheme(next);
+  });
+
+  // Follow live OS changes only while the visitor hasn't made an explicit choice.
+  mql.addEventListener('change', (e) => {
+    if (!storedTheme()) applyTheme(e.matches ? 'dark' : 'light');
+  });
 </script>

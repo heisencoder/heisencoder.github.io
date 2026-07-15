@@ -33,7 +33,29 @@ const canonical = new URL(Astro.url.pathname, SITE.url).href;
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
     <meta name="twitter:card" content="summary" />
-    <meta name="theme-color" content="#1f9e6f" />
+    <!-- Match the browser chrome to each theme's page background. -->
+    <meta name="theme-color" content="#f7f5ee" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0a0a0a" media="(prefers-color-scheme: dark)" />
+
+    <!-- Resolve the color theme before the first paint to avoid a flash: use the
+         visitor's stored choice if any, otherwise the OS default. Sets
+         data-theme on <html>; global.css keys every color off it. Inline and
+         synchronous on purpose — it must run before the body renders. -->
+    <script is:inline>
+      (function () {
+        try {
+          let t = localStorage.getItem('theme');
+          if (t !== 'dark' && t !== 'light') {
+            t = window.matchMedia('(prefers-color-scheme: dark)').matches
+              ? 'dark'
+              : 'light';
+          }
+          document.documentElement.dataset.theme = t;
+        } catch {
+          /* localStorage blocked — fall back to the CSS media query. */
+        }
+      })();
+    </script>
 
     <!-- Fixed-width type, 1960s teletype spirit. Self-hosted (see global.css),
          so there's no render-blocking trip to Google's font servers. Preload the
@@ -56,6 +78,8 @@ const canonical = new URL(Astro.url.pathname, SITE.url).href;
     />
   </head>
   <body>
+    <!-- Purely decorative: tractor-feed ribbons (light) / monitor bezel (dark). -->
+    <div class="deco-frame" aria-hidden="true"></div>
     <a class="skip-link" href="#main">Skip to content</a>
     <Nav />
     <main id="main">

@@ -3,6 +3,14 @@
    Aesthetic: 1960s teletype / terminal printout (borrowed, with thanks, from
    the Greenbriar Technology Group site).
    Primary color: mint green. Secondary color: burnt orange.
+
+   Two skins share the same layout, driven entirely by the theme tokens below:
+     • Light — a dot-matrix printout on warm paper, with tractor-feed ribbons.
+     • Dark  — a CRT-style monitor: a black screen inside a dark-gray bezel.
+   The pre-paint script in Layout.astro resolves the theme (stored choice, else
+   the OS default) and sets data-theme on <html>. Every rule below reads tokens
+   only, so the whole UI flips when the token values swap — no black background
+   ever appears in light mode, and no light background in dark mode.
    ========================================================================= */
 
 /* -------------------------------------------------------------------------
@@ -91,30 +99,84 @@
   src: url('/fonts/HeisenMICR.woff2') format('woff2');
 }
 
+/* =========================================================================
+   Theme tokens — LIGHT is the default. All contrast pairs meet WCAG AA.
+   ========================================================================= */
 :root {
-  /* Brand palette */
+  color-scheme: light;
+
+  /* Brand palette — constant across both themes */
   --mint: #1f9e6f;          /* primary — mint green (fills, borders, accents) */
-  --mint-ink: #0e7a54;      /* darker mint for text/links on paper (meets WCAG AA) */
+  --mint-ink: #0e7a54;      /* darker mint for text/links on paper (WCAG AA) */
   --mint-bright: #2bd49a;   /* brighter mint for accents on dark surfaces */
   --mint-wash: #e6f7ef;     /* faint mint background wash */
   --orange: #c0500f;        /* secondary — burnt orange */
-  --orange-ink: #ad470c;    /* darker burnt orange for text on the orange wash (AA) */
-  --orange-bright: #e2691f; /* brighter burnt orange for hovers */
+  --orange-ink: #ad470c;    /* darker burnt orange for text on the orange wash */
+  --orange-bright: #e2691f; /* brighter burnt orange for hovers / dark surfaces */
   --orange-wash: #fbeee2;   /* faint orange background wash */
 
   /* Surfaces & ink — a teletype printout on warm paper */
-  --paper: #f7f5ee;         /* page background */
-  --paper-raised: #fffdf7;  /* cards / raised surfaces */
-  --ink: #1c1b18;           /* primary text */
-  --ink-soft: #4a473f;      /* secondary text */
-  --ink-faint: #6f6c60;     /* muted text (darkened to meet WCAG AA on paper) */
-  --rule: #d8d3c4;          /* hairlines / borders */
-  --ink-dark-surface: #14150f; /* dark band background */
+  --paper: #f7f5ee;
+  --paper-raised: #fffdf7;
+  --ink: #1c1b18;
+  --ink-soft: #4a473f;
+  --ink-faint: #6f6c60;
+  --rule: #d8d3c4;
+
+  /* Semantic accents that must stay legible on the page background */
+  --link: var(--mint-ink);
+  --link-hover: var(--orange);
+  /* orange-ink (not orange) so eyebrows clear WCAG AA even on the solid-color
+     mint-wash band, where the softer orange lands at 4.3:1. */
+  --accent-warm: var(--orange-ink);  /* eyebrows, command prompts */
+  --accent-cool: var(--mint-ink);    /* tags, brand marks */
+
+  /* Highlighted band (home "Latest posts") — a highlighter pass, never black */
+  --band-bg: var(--mint-wash);
+  --band-ink: var(--ink);
+  --band-ink-soft: var(--ink-soft);
+  --band-heading: var(--ink);
+  --band-link: var(--mint-ink);
+  --band-rule: #cbe4d6;
+
+  /* Footer — the bottom of the printout, on paper */
+  --footer-bg: #f2eee3;
+  --footer-ink: #4a473f;
+  --footer-heading: #1c1b18;
+  --footer-faint: #5f5c51;
+  --footer-rule: #dcd7c8;
+
+  /* Terminal block (404) */
+  --term-bg: #edf3ee;
+  --term-ink: #0e7a54;
+  --term-border: var(--rule);
+
+  /* Inline code chip */
+  --code-inline-bg: var(--mint-wash);
+  --code-inline-ink: var(--ink);
+  --code-inline-border: var(--rule);
+
+  /* Buttons */
+  --btn-primary-ink: #06281d;
+
+  /* Paper texture + page furniture */
+  --feed-line: rgba(0, 0, 0, 0.018);       /* fan-fold feed lines */
+  --perf-dot: rgba(70, 58, 34, 0.17);      /* 11in page-break perforation */
+  --paper-highlight: rgba(255, 255, 255, 0.55);
+
+  /* Edge decoration: LIGHT = tractor-feed ribbons on both sides. */
+  --ribbon-w: clamp(10px, 2.2vw, 30px);
+  --ribbon-bg: #efe8d8;
+  --ribbon-hole: #c9bda1;
+  --ribbon-edge: #cdc2a8;
+  /* DARK swaps these in for a monitor bezel; off in light mode. */
+  --bezel-w: 0px;
+  --bezel: transparent;
+  --bezel-shadow: none;
 
   /* Typography — fixed-width throughout */
   --mono: 'IBM Plex Mono', 'JetBrains Mono', 'SFMono-Regular', 'Menlo',
     'Consolas', 'Liberation Mono', monospace;
-  /* Display face for titles + headings; falls back to the mono stack. */
   --display: 'HeisenMICR', var(--mono);
 
   /* Rhythm */
@@ -122,6 +184,120 @@
   --maxw-prose: 46rem;
   --gap: clamp(1rem, 2.5vw, 2rem);
   --radius: 4px;
+}
+
+/* -------------------------------------------------------------------------
+   DARK theme — a monitor with a black screen and a dark-gray bezel.
+   Reuses the proven light-on-dark values from the old dark band, so every
+   pair still meets WCAG AA. Duplicated once more inside the prefers-color-
+   scheme block below purely as a no-JS fallback (see the note there).
+   ------------------------------------------------------------------------- */
+:root[data-theme='dark'] {
+  color-scheme: dark;
+
+  --paper: #0a0a0a;
+  --paper-raised: #16160f;
+  --ink: #e9e6da;
+  --ink-soft: #c7c4b8;
+  --ink-faint: #9d9a8f;
+  --rule: #2f3026;
+
+  --link: var(--mint-bright);
+  --link-hover: var(--orange-bright);
+  --accent-warm: var(--orange-bright);
+  --accent-cool: var(--mint-bright);
+
+  --band-bg: #111109;
+  --band-ink: #ece9df;
+  --band-ink-soft: #cfccc1;
+  --band-heading: #ffffff;
+  --band-link: var(--mint-bright);
+  --band-rule: #2f3026;
+
+  --footer-bg: #0d0d0a;
+  --footer-ink: #cfccc1;
+  --footer-heading: #ffffff;
+  --footer-faint: #8c8a80;
+  --footer-rule: #2a2b22;
+
+  --term-bg: #0c0d08;
+  --term-ink: var(--mint-bright);
+  --term-border: #2f3026;
+
+  --code-inline-bg: #16231c;
+  --code-inline-ink: #7fe0bb;
+  --code-inline-border: #2f3026;
+
+  --feed-line: transparent;      /* a screen has no paper texture */
+  --perf-dot: transparent;
+  --paper-highlight: rgba(120, 170, 145, 0.045); /* faint phosphor glow */
+
+  --ribbon-w: 0px;               /* no ribbons on a monitor */
+  --ribbon-bg: transparent;
+  --ribbon-hole: transparent;
+  --ribbon-edge: transparent;
+  --bezel-w: clamp(14px, 2.4vw, 34px);
+  --bezel: #2a2a2a;              /* dark-gray monitor border */
+  --bezel-shadow:
+    inset 0 0 0 1px #000,
+    inset 0 0 26px rgba(0, 0, 0, 0.9),
+    inset 0 0 2px rgba(255, 255, 255, 0.05);
+}
+
+/* No-JS fallback: if the pre-paint script never runs, honor the OS default.
+   When JS is on, data-theme is always present and this block is inert. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    color-scheme: dark;
+
+    --paper: #0a0a0a;
+    --paper-raised: #16160f;
+    --ink: #e9e6da;
+    --ink-soft: #c7c4b8;
+    --ink-faint: #9d9a8f;
+    --rule: #2f3026;
+
+    --link: var(--mint-bright);
+    --link-hover: var(--orange-bright);
+    --accent-warm: var(--orange-bright);
+    --accent-cool: var(--mint-bright);
+
+    --band-bg: #111109;
+    --band-ink: #ece9df;
+    --band-ink-soft: #cfccc1;
+    --band-heading: #ffffff;
+    --band-link: var(--mint-bright);
+    --band-rule: #2f3026;
+
+    --footer-bg: #0d0d0a;
+    --footer-ink: #cfccc1;
+    --footer-heading: #ffffff;
+    --footer-faint: #8c8a80;
+    --footer-rule: #2a2b22;
+
+    --term-bg: #0c0d08;
+    --term-ink: var(--mint-bright);
+    --term-border: #2f3026;
+
+    --code-inline-bg: #16231c;
+    --code-inline-ink: #7fe0bb;
+    --code-inline-border: #2f3026;
+
+    --feed-line: transparent;
+    --perf-dot: transparent;
+    --paper-highlight: rgba(120, 170, 145, 0.045);
+
+    --ribbon-w: 0px;
+    --ribbon-bg: transparent;
+    --ribbon-hole: transparent;
+    --ribbon-edge: transparent;
+    --bezel-w: clamp(14px, 2.4vw, 34px);
+    --bezel: #2a2a2a;
+    --bezel-shadow:
+      inset 0 0 0 1px #000,
+      inset 0 0 26px rgba(0, 0, 0, 0.9),
+      inset 0 0 2px rgba(255, 255, 255, 0.05);
+  }
 }
 
 /* ----- Reset-ish ----- */
@@ -148,14 +324,26 @@ body {
   line-height: 1.65;
   color: var(--ink);
   background-color: var(--paper);
-  /* Subtle horizontal "feed lines" like fan-fold teletype paper */
-  background-image: repeating-linear-gradient(
-    to bottom,
-    transparent 0,
-    transparent 2.25rem,
-    rgba(0, 0, 0, 0.018) 2.25rem,
-    rgba(0, 0, 0, 0.018) calc(2.25rem + 1px)
-  );
+  min-height: 100vh;
+  /* Layered furniture, back to front:
+       1. a very subtle paper highlight (fixed, like light across the sheet),
+       2. the 11in page-break perforation — one dotted row per US fan-fold page,
+       3. the fine horizontal fan-fold feed lines.
+     In dark mode tokens 1–3 collapse to transparent, leaving a plain screen. */
+  background-image:
+    radial-gradient(150% 55% at 50% -8%, var(--paper-highlight), transparent 55%),
+    radial-gradient(circle, var(--perf-dot) 0.9px, transparent 1.6px),
+    repeating-linear-gradient(
+      to bottom,
+      transparent 0,
+      transparent 2.25rem,
+      var(--feed-line) 2.25rem,
+      var(--feed-line) calc(2.25rem + 1px)
+    );
+  background-repeat: no-repeat, repeat, repeat;
+  background-size: 100% 100vh, 15px 11in, auto;
+  /* First perforation lands ~11in down, then every 11in after. */
+  background-position: center top, left 5.5in, left top;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
@@ -166,15 +354,15 @@ img {
 }
 
 a {
-  color: var(--mint-ink);
+  color: var(--link);
   text-decoration: none;
   border-bottom: 1px solid transparent;
   transition: color 0.15s ease, border-color 0.15s ease;
 }
 
 a:hover {
-  color: var(--orange);
-  border-bottom-color: var(--orange);
+  color: var(--link-hover);
+  border-bottom-color: var(--link-hover);
 }
 
 /* In-text links carry an underline so they're distinguishable without relying
@@ -185,7 +373,7 @@ main :is(p, li, dd) a {
 }
 
 main :is(p, li, dd) a:hover {
-  border-bottom-color: var(--orange);
+  border-bottom-color: var(--link-hover);
 }
 
 h1,
@@ -227,8 +415,9 @@ ol {
 
 code,
 kbd {
-  background: var(--mint-wash);
-  border: 1px solid var(--rule);
+  background: var(--code-inline-bg);
+  color: var(--code-inline-ink);
+  border: 1px solid var(--code-inline-border);
   border-radius: 3px;
   padding: 0.05em 0.35em;
   font-size: 0.9em;
@@ -260,36 +449,32 @@ hr {
   padding-block: clamp(2rem, 4vw, 3rem);
 }
 
-.section--dark {
-  background: var(--ink-dark-surface);
-  color: #ece9df;
+/* A highlighted band — light: a mint highlighter pass; dark: a faint panel on
+   the screen. Never a black block in light mode. */
+.section--band {
+  background: var(--band-bg);
+  color: var(--band-ink);
 }
 
-.section--dark h1,
-.section--dark h2,
-.section--dark h3 {
-  color: #fff;
+.section--band :is(h1, h2, h3) {
+  color: var(--band-heading);
 }
 
-.section--dark a {
-  color: var(--mint-bright);
+.section--band a {
+  color: var(--band-link);
 }
 
-.section--dark a:hover {
-  color: var(--orange-bright);
-  border-bottom-color: var(--orange-bright);
+.section--band a:hover {
+  color: var(--link-hover);
+  border-bottom-color: var(--link-hover);
 }
 
-.section--dark .eyebrow {
-  color: var(--orange-bright);
+.section--band .lead {
+  color: var(--band-ink-soft);
 }
 
-.section--dark .lead {
-  color: #d7d4c8;
-}
-
-.section--dark .btn--primary {
-  color: #06281d;
+.section--band .btn--primary {
+  color: var(--btn-primary-ink);
 }
 
 /* Eyebrow label — the "command prompt" motif */
@@ -298,13 +483,13 @@ hr {
   font-size: 0.8rem;
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: var(--orange);
+  color: var(--accent-warm);
   margin-bottom: 0.75rem;
 }
 
 .eyebrow::before {
   content: '> ';
-  color: var(--mint);
+  color: var(--accent-cool);
 }
 
 .lead {
@@ -330,7 +515,7 @@ hr {
 
 .btn--primary {
   background: var(--mint);
-  color: #06281d;
+  color: var(--btn-primary-ink);
 }
 
 .btn--primary:hover {
@@ -379,7 +564,7 @@ hr {
   font-size: 0.75rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--mint-ink);
+  color: var(--accent-cool);
 }
 
 .card h3 {
@@ -441,7 +626,7 @@ a.card:hover {
 }
 
 .prose a:hover {
-  border-bottom-color: var(--orange);
+  border-bottom-color: var(--link-hover);
 }
 
 .prose blockquote {
@@ -457,22 +642,57 @@ a.card:hover {
   border: 1px solid var(--rule);
 }
 
-/* Fenced code blocks (Astro/Shiki wraps them in <pre class="astro-code">). */
+/* Fenced code blocks. Astro/Shiki emits <pre class="astro-code ..."> with dual
+   github-light / github-dark colors exposed as CSS custom properties (see
+   astro.config.mjs, defaultColor:false). We pick the set that matches the
+   active theme, so a light-mode code block is a light printout and a dark-mode
+   one is a terminal window — never the wrong luminance for the page. */
 .prose pre {
-  background: var(--ink-dark-surface);
-  color: #ece9df;
+  border: 1px solid var(--rule);
   border-radius: var(--radius);
   padding: 1rem 1.25rem;
   overflow-x: auto;
   font-size: 0.9rem;
   line-height: 1.55;
+  background-color: var(--shiki-light-bg);
+  color: var(--shiki-light);
 }
 
-/* Inline code keeps the mint chip; code inside a fenced block does not. */
+.prose pre span {
+  color: var(--shiki-light);
+  font-weight: var(--shiki-light-font-weight, inherit);
+  font-style: var(--shiki-light-font-style, inherit);
+}
+
+:root[data-theme='dark'] .prose pre {
+  background-color: var(--shiki-dark-bg);
+  color: var(--shiki-dark);
+}
+
+:root[data-theme='dark'] .prose pre span {
+  color: var(--shiki-dark);
+  font-weight: var(--shiki-dark-font-weight, inherit);
+  font-style: var(--shiki-dark-font-style, inherit);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) .prose pre {
+    background-color: var(--shiki-dark-bg);
+    color: var(--shiki-dark);
+  }
+  :root:not([data-theme]) .prose pre span {
+    color: var(--shiki-dark);
+    font-weight: var(--shiki-dark-font-weight, inherit);
+    font-style: var(--shiki-dark-font-style, inherit);
+  }
+}
+
+/* Inline code keeps the chip; code inside a fenced block does not. */
 .prose pre code {
   background: none;
   border: none;
   padding: 0;
+  color: inherit;
   font-size: inherit;
 }
 
@@ -488,6 +708,52 @@ a.card:hover {
   border: 1px solid var(--rule);
   padding: 0.45rem 0.7rem;
   text-align: left;
+}
+
+/* =========================================================================
+   Edge decoration — a single fixed overlay drawn above the content, but
+   pointer-events:none so it never intercepts clicks. Content clears it because
+   every .container keeps at least --gap (>= 16px) of inline padding, wider than
+   the ribbon/bezel.
+     • LIGHT: left + right tractor-feed ribbons with sprocket holes.
+     • DARK : the same two edges become a dark-gray monitor bezel.
+   ========================================================================= */
+.deco-frame {
+  position: fixed;
+  inset: 0;
+  z-index: 60; /* above the sticky header so the edges read as continuous */
+  pointer-events: none;
+  border-inline: var(--bezel-w) solid var(--bezel);
+  box-shadow: var(--bezel-shadow);
+}
+
+.deco-frame::before,
+.deco-frame::after {
+  content: '';
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  width: var(--ribbon-w);
+  background-color: var(--ribbon-bg);
+  /* Sprocket holes: one punched circle every 22px down the strip. */
+  background-image: radial-gradient(
+    circle,
+    var(--ribbon-hole) 0 2.2px,
+    transparent 2.7px
+  );
+  background-repeat: repeat-y;
+  background-position: center 12px;
+  background-size: 100% 22px;
+}
+
+.deco-frame::before {
+  left: 0;
+  border-right: 1px dashed var(--ribbon-edge);
+}
+
+.deco-frame::after {
+  right: 0;
+  border-left: 1px dashed var(--ribbon-edge);
 }
 
 /* ----- Utility ----- */
@@ -507,7 +773,8 @@ a.card:hover {
   position: absolute;
   left: -999px;
   top: 0;
-  background: var(--ink);
+  /* Fixed high-contrast colors so it stays legible in either theme. */
+  background: #0e7a54;
   color: #fff;
   padding: 0.6rem 1rem;
   z-index: 100;
@@ -519,6 +786,6 @@ a.card:hover {
 }
 
 :focus-visible {
-  outline: 2px solid var(--orange);
+  outline: 2px solid var(--accent-warm);
   outline-offset: 2px;
 }

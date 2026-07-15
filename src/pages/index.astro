@@ -90,7 +90,7 @@ const fmtDate = (d: Date) =>
   </section>
 
   <!-- ===== Latest from the blog ===== -->
-  <section class="section section--dark">
+  <section class="section section--band">
     <div class="container">
       <p class="eyebrow">From the blog</p>
       <h2>Latest posts</h2>
@@ -185,7 +185,7 @@ const fmtDate = (d: Date) =>
     }
   }
 
-  /* Blog teaser list (on the dark band) */
+  /* Blog teaser list (on the highlighted band) */
   .post-list {
     list-style: none;
     margin: 2rem 0 0;
@@ -197,7 +197,7 @@ const fmtDate = (d: Date) =>
 
   .post-list__item {
     padding-bottom: 1.5rem;
-    border-bottom: 1px dashed #2f3026;
+    border-bottom: 1px dashed var(--band-rule);
   }
 
   .post-list__link {
@@ -210,11 +210,11 @@ const fmtDate = (d: Date) =>
     font-size: 0.82rem;
     letter-spacing: 0.06em;
     text-transform: uppercase;
-    color: #9d9a8f;
+    color: var(--ink-faint);
   }
 
   .post-list__desc {
     margin: 0;
-    color: #cfccc1;
+    color: var(--band-ink-soft);
   }
 </style>
